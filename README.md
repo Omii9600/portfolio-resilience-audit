@@ -106,19 +106,53 @@ Reported measures include annualized return and volatility, a zero-risk-free-rat
 
 The notebook provides the analysis framework; **the answers must come from executing it**. Avoid filling this README with guessed performance values.
 
-## Visualizations
+## Visual analysis
 
-The notebook saves figures to the `images/` directory. Figure names are designed to map directly to the analysis:
+The notebook creates these seven figures in `images/`. The embeds below use relative paths so GitHub displays them after you run the notebook and commit the generated PNGs. **Until those files exist in the repository, the image links will appear broken.** Run every cell, inspect each chart, and confirm its result before publishing.
 
-- `01_ticker_coverage.png` — distribution of available observations across tickers.
-- `02_test_wealth.png` — held-out growth of one unit for each portfolio.
-- `03_test_drawdowns.png` — held-out peak-to-trough losses.
-- `04_breadth_risk.png` — absolute risk measures by number of holdings.
-- `05_rolling_stability.png` — rolling risk and return, only if the held-out series is long enough.
-- `06_cost_sensitivity.png` — annualized-return sensitivity to rebalance costs.
-- `07_training_correlations.png` — correlation structure of training-selected holdings.
+### 1. Data coverage
 
-After running the notebook, you can embed verified figures in this README, for example: `![Held-out portfolio drawdowns](images/03_test_drawdowns.png)`. Do not add a chart until the file exists and you have checked its axes, labels, and underlying output.
+Shows how many daily observations are available for each ticker. Large differences in history can affect comparisons and motivate the coverage screen.
+
+![Daily observations available per ticker](images/01_ticker_coverage.png)
+
+### 2. Held-out portfolio growth
+
+Compares the growth paths of the candidate portfolios during the chronological test period, before modeled trading costs.
+
+![Held-out test-period growth of one unit](images/02_test_wealth.png)
+
+### 3. Held-out drawdowns
+
+Shows each portfolio's decline from its previous wealth peak. Use this alongside return; a smoother or shallower drawdown does not automatically mean a better investment.
+
+![Held-out test-period portfolio drawdowns](images/03_test_drawdowns.png)
+
+### 4. Risk by portfolio breadth
+
+Compares absolute risk measures as the number of equal-weight holdings changes. The values and definitions are shown in the notebook output.
+
+![Absolute downside-risk measures by portfolio breadth](images/04_breadth_risk.png)
+
+### 5. Rolling-window stability
+
+Shows rolling 252-session risk and return if enough test observations are available. With the supplied data, the test period has approximately 503 daily observations, so the chart should be generated; check the cell output when you run the notebook.
+
+![Rolling 252-session risk and return](images/05_rolling_stability.png)
+
+### 6. Rebalance-cost sensitivity
+
+Shows how the notebook's simplified turnover-cost assumptions affect annualized return for monthly and quarterly rebalancing. It is a sensitivity illustration, not a transaction-level backtest.
+
+![Annualized-return sensitivity to assumed turnover costs](images/06_cost_sensitivity.png)
+
+### 7. Training-period correlations
+
+Shows daily-return correlations among the selected holdings during training, before the holdout period. Correlation describes co-movement in this sample; it does not explain why securities moved together.
+
+![Training-period return correlation heatmap](images/07_training_correlations.png)
+
+**To make these images render on GitHub:** run `portfolio_resilience_audit.ipynb` from the repository root, confirm the seven PNGs exist in `images/`, then commit that folder. If a figure was not generated or its output is not valid, remove that embed rather than publishing a broken or misleading chart.
 
 ## Interpreting the metrics
 
@@ -154,28 +188,3 @@ Do not use “diversification always protects” or claim a strategy is profitab
 7. **Risk estimates are backward-looking:** Historical volatility, VaR, CVaR, Sharpe ratios, and drawdowns do not guarantee future behavior.
 8. **No fundamentals or sectors:** This file cannot explain performance using earnings, valuation, sector membership, or company events.
 
-This repository is for learning and portfolio-risk analysis. It is not investment, tax, or financial advice.
-
-## Reproducibility checklist
-
-- [ ] Use the selected notebook `portfolio_resilience_audit.ipynb` (not the earlier `sp500_stock_analysis.ipynb`).
-- [ ] Set `DATA_PATH` correctly for your local environment.
-- [ ] Restart the kernel and run every cell in order.
-- [ ] Confirm all output dates, portfolio counts, tables, and charts are populated.
-- [ ] Record Python and package versions if sharing results across environments.
-- [ ] Verify source attribution, license, and adjustment status in `CITATION_AND_LICENSE.md`.
-- [ ] Replace result placeholders only with values observed in the notebook.
-- [ ] Check `.gitignore` excludes the raw CSV unless its license allows redistribution.
-- [ ] Include only generated, reviewed figures in `images/`.
-
-## License and attribution
-
-The repository's `LICENSE` applies to the original project code and documentation only. It does **not** grant rights to the third-party CSV. Complete `CITATION_AND_LICENSE.md` with the verified dataset source, author, license, access date, and adjustment-status evidence. Do not publish with attribution placeholders unresolved.
-
-## Essential project files
-
-- [`portfolio_resilience_audit.ipynb`](portfolio_resilience_audit.ipynb) — analysis notebook.
-- [`requirements.txt`](requirements.txt) — Python dependencies.
-- [`.gitignore`](.gitignore) — prevents accidental commits of the raw dataset and temporary files.
-- [`CITATION_AND_LICENSE.md`](CITATION_AND_LICENSE.md) — dataset attribution and license checklist.
-- [`LICENSE`](LICENSE) — license for the original project code and documentation.
