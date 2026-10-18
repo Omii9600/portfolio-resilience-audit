@@ -1,80 +1,181 @@
 # The Resilience Test: What Did Diversification Actually Protect?
 
-A reproducible portfolio-risk investigation using 619,040 daily observations across 505 tickers from February 2013 to February 2018. It tests whether diversification reduced downside risk in a chronological holdout, and whether that result holds across portfolio breadth, rolling windows, rebalance frequency, and illustrative transaction-cost assumptions.
+A reproducible historical portfolio-risk audit using the supplied `all_stocks_5yr.csv`. Rather than selecting stocks by their eventual returns, the project screens candidates using training-period liquidity and compares portfolio construction choices on a later chronological holdout. It asks whether diversification reduced downside risk—and whether the answer survives changes in portfolio breadth, rebalance frequency, and assumed trading costs.
 
-> Historical educational analysis only. Not investment advice. This dataset ends in 2018; it is not current-market research.
+> **Important:** This is historical educational analysis, not investment advice. The dataset ends on February 7, 2018; it is not current-market research.
 
-## Why this project is different
+## Project at a glance
 
-Instead of selecting eventual winners, this project asks whether broader portfolios reduced downside risk in a later holdout—and whether that finding persists across portfolio breadth, rolling windows, and cost assumptions. It makes ticker-screening choices, survivorship risk, adjustment uncertainty, and backtest simplifications visible. The central question is: **What did diversification protect in this sample, and how robust is that evidence?**
+- **Primary question:** Did a broader portfolio experience less downside risk than a concentrated portfolio in the held-out period?
+- **Secondary question:** Did the risk result persist across rolling windows, weighting methods, rebalance frequencies, and illustrative transaction-cost assumptions?
+- **Dataset observed:** 619,040 rows, 7 columns, 505 tickers, dated February 8, 2013–February 7, 2018.
+- **Main deliverable:** [`portfolio_resilience_audit.ipynb`](portfolio_resilience_audit.ipynb), a Jupyter notebook with data checks, analysis, figures, and result interpretation prompts.
+- **Project status:** Code and analysis plan are provided; run the notebook before reporting results. Do not describe unrun outputs as findings.
 
-## Dataset
+## Why this is more than a stock-ranking exercise
 
-Input file: `all_stocks_5yr.csv`  
-Observed in the supplied file: **619,040 rows, 7 columns, 505 tickers**. Date range: **2013-02-08 to 2018-02-07**. Fields: `date`, `open`, `high`, `low`, `close`, `volume`, `Name`. Missing values are limited to 11 `open`, 8 `high`, and 8 `low` entries; the return analysis relies on `close`.
+A list of top-returning tickers is easy to produce but weak evidence for a portfolio decision. It selects winners after observing the period and ignores the losses and uncertainty along the way. This project instead uses a chronological split and a training-only liquidity screen, then asks how candidate portfolio designs behave on later observations.
 
-For local use, put the CSV beside the notebook. In Kaggle, create a notebook, attach the CSV using **Add Input**, and edit `DATA_PATH` to the mounted input path shown in the Kaggle file browser. The notebook's coverage screen and common complete-case panel determine the analyzed universe; the exact ticker count is printed when you run it. Respect the original dataset's attribution and license; confirm those details on its source page before republishing any data.
+The analysis emphasizes **resilience**—volatility, drawdown, tail losses, and time spent below a previous wealth peak—alongside return. It also challenges its own conclusions with portfolio-breadth, rebalancing, and cost sensitivities. The aim is not to claim that a particular strategy will work in the future; it is to show how assumptions shape a historical comparison and where the evidence is insufficient.
 
-## Repository layout
+## Dataset and data dictionary
 
-.
-├── all_stocks_5yr.csv        # keep local; do not commit unless license permits
+The uploaded file is named `all_stocks_5yr.csv`. Its observed fields are:
+
+| Column | Meaning used in this analysis |
+|---|---|
+| `date` | Trading date, parsed as a date value |
+| `open` | Reported opening price |
+| `high` | Reported high price |
+| `low` | Reported low price |
+| `close` | Closing price used to calculate close-to-close returns |
+| `volume` | Reported trading volume |
+| `Name` | Ticker identifier |
+
+In the supplied copy, `open`, `high`, and `low` have a small number of missing values; `close`, `volume`, `date`, and `Name` were complete. The notebook validates this again when run. It does not invent missing prices. **The split- and dividend-adjustment status has not been verified**; until it is confirmed from the dataset source documentation, treat computed performance as unadjusted price-return analysis.
+
+The file covers 505 tickers, but that does not prove it is a point-in-time record of all constituents. If failed or delisted companies are absent, survivorship bias may inflate historical results. The source page, uploader, license, and adjustment status must be checked and cited before publishing; do not redistribute the CSV unless its license permits it.
+
+## Repository structure and file paths
+
+Keep the selected notebook and supporting project files together at the repository root. The recommended structure is:
+
+portfolio-resilience-audit/
+├── README.md
 ├── portfolio_resilience_audit.ipynb
 ├── requirements.txt
 ├── .gitignore
 ├── LICENSE
 ├── CITATION_AND_LICENSE.md
-├── PROJECT_DESCRIPTION.md
-├── MEDIUM_ARTICLE_DRAFT.md
-└── images/                   # generated charts; notebook creates this folder
+├── data/
+│   └── all_stocks_5yr.csv         # local only unless redistribution is allowed
+└── images/                        # figures generated by running the notebook
 
-## Run locally
+**Important path note:** The notebook initially looks for `all_stocks_5yr.csv` beside the notebook. If you store it in `data/`, change `DATA_PATH` near the top of the notebook to `Path('data/all_stocks_5yr.csv')`. The images appear only after a successful run. Do not upload duplicate or superseded notebooks; use `portfolio_resilience_audit.ipynb` as the project notebook.
 
-1. Create a Python 3.10+ environment.
-2. Install dependencies: `pip install -r requirements.txt`
-3. Put `all_stocks_5yr.csv` beside the notebook.
-4. Open `portfolio_resilience_audit.ipynb` in Jupyter and run all cells.
-5. Review outputs before writing numerical conclusions. Figures export to `images/`.
+## How to run locally
 
-## Questions explored
+1. Install Python 3.10 or newer and Jupyter Notebook/JupyterLab.
+2. Download or place the source CSV locally, following its license and attribution requirements.
+3. Put the CSV beside the notebook, or update `DATA_PATH` for the `data/` subfolder.
+4. From the project root, install dependencies:
 
-- Does diversification reduce held-out downside risk as portfolio breadth increases?
-- How do annualized volatility, maximum drawdown, historical 5% VaR and CVaR compare across portfolio constructions?
-- Is any risk reduction stable across the held-out period and rolling 252-day windows?
-- How sensitive are results to monthly versus quarterly rebalancing and illustrative turnover costs?
-- How does capped inverse-volatility weighting compare with equal weighting?
-- What do training-period correlations and constituent-versus-portfolio volatility reveal about diversification?
+   ```bash
+   python -m pip install -r requirements.txt
+   ```
 
-## Methods
+5. Open `portfolio_resilience_audit.ipynb` in Jupyter.
+6. Select **Restart Kernel and Run All Cells**. Resolve any path or package errors before interpreting output.
+7. Check that every cell completes, inspect the printed ticker/date counts, and review the figures saved under `images/`.
+8. Write the results section only from values produced by that run. Keep the notebook outputs in the committed notebook only after checking they are correct and reproducible.
 
-Chronological 60/40 train-test split; ticker coverage screen; training-only liquidity selection; complete common return panel; close-to-close returns; equal-weight portfolios at multiple breadths; capped inverse-volatility portfolio; annualized metrics using 252 trading days; maximum drawdown; empirical 5% daily VaR/CVaR; rolling-window stability and cost/rebalance sensitivity. This is a transparent historical study, not production-grade execution backtesting.
+## Analysis workflow
 
-## Important limitations
+### 1. Audit the source
 
-The file ends in 2018 and may omit delisted firms or historical index constituents, creating survivorship bias. Split- and dividend-adjustment status is unverified. The analysis uses a common complete-case panel, simplified rebalancing, and illustrative costs; it excludes taxes, bid-ask spreads, market impact, and executable trading. These limitations can materially change results. Do not present this as current-market research or investment advice.
+The notebook checks required columns, duplicate ticker-date keys, missing values, invalid closing prices, date coverage, and observations per ticker. This makes data quality visible before return comparisons.
 
-## Results
+### 2. Engineer returns and set the time split
 
-Run the notebook and insert only findings supported by its outputs. Add selected figures from `images/` here, with descriptive captions and alt text. Do not commit conclusions or screenshots with fabricated or placeholder results.
+It calculates daily close-to-close percentage returns per ticker and divides the timeline chronologically into a 60% training segment and 40% test segment. A ticker must meet the notebook's documented coverage threshold in both segments. This is a screening choice, not proof that the sample is unbiased.
 
-## Medium article draft
+### 3. Select candidates without using future returns
 
-### The Resilience Test: What Did Diversification Actually Protect?
+Candidate tickers are ranked using mean dollar volume in the training period only. Portfolio membership is therefore not chosen by test-period performance. This does not cure survivorship bias already present in the input dataset.
 
-Diversification is often described as a free reduction in risk. But how much protection does it provide in practice—and does that protection survive different market windows, portfolio sizes, and trading assumptions?
+### 4. Compare portfolio construction choices
 
-I examined 619,040 daily observations across 505 tickers from February 2013 to February 2018. Rather than selecting stocks by their eventual winners, I used a chronological split: training-period liquidity screened the candidate universe, and portfolio comparisons were evaluated on a later holdout. I compared equal-weight portfolios of different breadths with a capped inverse-volatility alternative.
+The notebook evaluates equal-weight portfolios with multiple holding counts and a capped inverse-volatility alternative. It calculates portfolio returns on the common panel and compares return and downside measures. Read the code and its stated assumptions before interpreting the comparison as an investable strategy.
 
-**I measured resilience, not just return.** Held-out annualized volatility and maximum drawdown show the broad path of risk; empirical 5% VaR and CVaR focus on the weaker daily outcomes. The longest underwater spell adds a recovery-time perspective. *(Insert `images/02_test_wealth.png` and `images/03_test_drawdowns.png`.)*
+### 5. Measure risk and challenge assumptions
 
-**Then I challenged the result.** [Insert actual values from `summary` and `breadth_df`: which portfolio reduced downside risk, and what return trade-off came with it?] [State whether the relationship held across rolling windows.] Monthly versus quarterly rebalancing and illustrative turnover-cost assumptions help reveal whether a headline result depends on convenient assumptions. *(Insert `images/04_breadth_risk.png`, `images/05_rolling_stability.png` if available, and `images/06_cost_sensitivity.png`.)*
+Reported measures include annualized return and volatility, a zero-risk-free-rate Sharpe ratio, maximum drawdown, empirical daily 5% VaR and CVaR, and longest underwater duration. Additional analyses examine breadth, rolling 252-session stability where data permits, rebalance frequency, illustrative turnover costs, and training-period correlations.
 
-This is not proof that a particular portfolio will perform better in the future. The data ends in 2018; its split/dividend adjustment and survivorship status are unverified, and the cost model is simplified. Better point-in-time constituents, adjusted prices, and executable transaction-cost data could materially change the findings.
+## Questions the notebook investigates
 
-**Takeaway:** [After running the notebook, summarize one measured result, one important caveat, and the next dataset or test that could change the conclusion. Do not publish unverified numbers.]
+1. How much ticker coverage is available, and what universe survives the stated coverage screen?
+2. Does downside risk change as equal-weight portfolio breadth increases?
+3. Is lower volatility accompanied by a return trade-off?
+4. Which portfolio construction has the least severe historical drawdown and 5% tail loss in the test period?
+5. How long does each portfolio remain below its prior wealth peak?
+6. Are risk comparisons stable across rolling one-year windows, where the test-period length permits?
+7. Do conclusions change under monthly versus quarterly rebalancing?
+8. How sensitive are returns to illustrative turnover-cost assumptions?
+9. Does capped inverse-volatility weighting behave differently from equal weighting?
+10. What do training-period correlations and portfolio-versus-constituent volatility suggest about diversification in this sample?
 
-*This article is for educational purposes and is not investment advice.*
+The notebook provides the analysis framework; **the answers must come from executing it**. Avoid filling this README with guessed performance values.
 
-## Publish responsibly
+## Visualizations
 
-Do not upload the raw CSV to GitHub or re-host it on Kaggle unless the dataset license permits redistribution. Link to the original source, cite its author, and verify its license. The notebook can be published with the attached dataset input on Kaggle; include your own interpretation and acknowledge the source. Replace every bracketed article prompt with results from a successful notebook run before publishing.
+The notebook saves figures to the `images/` directory. Figure names are designed to map directly to the analysis:
+
+- `01_ticker_coverage.png` — distribution of available observations across tickers.
+- `02_test_wealth.png` — held-out growth of one unit for each portfolio.
+- `03_test_drawdowns.png` — held-out peak-to-trough losses.
+- `04_breadth_risk.png` — absolute risk measures by number of holdings.
+- `05_rolling_stability.png` — rolling risk and return, only if the held-out series is long enough.
+- `06_cost_sensitivity.png` — annualized-return sensitivity to rebalance costs.
+- `07_training_correlations.png` — correlation structure of training-selected holdings.
+
+After running the notebook, you can embed verified figures in this README, for example: `![Held-out portfolio drawdowns](images/03_test_drawdowns.png)`. Do not add a chart until the file exists and you have checked its axes, labels, and underlying output.
+
+## Interpreting the metrics
+
+- **Annualized return:** compounded growth scaled to a one-year rate over the evaluated observations. Historical estimate, not expected future return.
+- **Annualized volatility:** standard deviation of daily returns scaled by the square root of 252. It summarizes dispersion, not every kind of risk.
+- **Sharpe ratio (risk-free rate set to zero):** average return per unit of volatility under the notebook's stated simplification. A different risk-free rate can change it.
+- **Maximum drawdown:** worst percentage decline from a previous cumulative-wealth high in the measured period.
+- **VaR 5%:** empirical fifth percentile of daily portfolio returns; it is a sample quantile, not a maximum-loss bound.
+- **CVaR 5%:** mean daily return among observations at or below the empirical 5% quantile; tail samples can be small and unstable.
+- **Longest underwater duration:** longest run of observations in which cumulative wealth remains below a previous peak. It does not measure the magnitude of the loss by itself.
+- **Turnover-cost sensitivity:** a simplified deduction based on assumed basis-point costs. It is not a transaction-level fill simulation.
+
+## Results and decision memo
+
+Complete this section **after a successful run**. State the exact holdout dates and portfolio definitions. Use numbers from the notebook outputs, and distinguish observed results from interpretation.
+
+- **Main measured result:** [Which portfolio had lower downside risk? Include the metric, value, and test dates.]
+- **Return/risk trade-off:** [Did lower downside risk coincide with lower or higher annualized return?]
+- **Robustness:** [Did the relationship persist across breadth, rolling windows, rebalance frequency, and cost assumptions?]
+- **Interpretation:** [What cautious portfolio-design insight is supported by this sample?]
+- **What remains unknown:** [Which data or assumptions could change the conclusion?]
+
+Do not use “diversification always protects” or claim a strategy is profitable based solely on this historical experiment.
+
+## Limitations and responsible use
+
+1. **Historical endpoint:** The data stops in February 2018 and cannot support claims about today's market.
+2. **Corporate actions:** Price-adjustment status for splits and dividends is unverified. If prices are unadjusted, returns may be distorted.
+3. **Survivorship and membership:** The file may omit delisted companies or fail to represent historical index membership point in time. A surviving-ticker universe can overstate historical performance.
+4. **Common-panel selection:** The complete-case screen may favor tickers with cleaner or longer histories and narrows the analyzed sample.
+5. **Simplified portfolio mechanics:** Rebalancing and costs are approximations; no actual orders, bid-ask spreads, market impact, taxes, financing, or execution constraints are modeled.
+6. **Short test history:** Rolling one-year analysis requires adequate test observations. If the notebook reports insufficient length, do not infer rolling stability.
+7. **Risk estimates are backward-looking:** Historical volatility, VaR, CVaR, Sharpe ratios, and drawdowns do not guarantee future behavior.
+8. **No fundamentals or sectors:** This file cannot explain performance using earnings, valuation, sector membership, or company events.
+
+This repository is for learning and portfolio-risk analysis. It is not investment, tax, or financial advice.
+
+## Reproducibility checklist
+
+- [ ] Use the selected notebook `portfolio_resilience_audit.ipynb` (not the earlier `sp500_stock_analysis.ipynb`).
+- [ ] Set `DATA_PATH` correctly for your local environment.
+- [ ] Restart the kernel and run every cell in order.
+- [ ] Confirm all output dates, portfolio counts, tables, and charts are populated.
+- [ ] Record Python and package versions if sharing results across environments.
+- [ ] Verify source attribution, license, and adjustment status in `CITATION_AND_LICENSE.md`.
+- [ ] Replace result placeholders only with values observed in the notebook.
+- [ ] Check `.gitignore` excludes the raw CSV unless its license allows redistribution.
+- [ ] Include only generated, reviewed figures in `images/`.
+
+## License and attribution
+
+The repository's `LICENSE` applies to the original project code and documentation only. It does **not** grant rights to the third-party CSV. Complete `CITATION_AND_LICENSE.md` with the verified dataset source, author, license, access date, and adjustment-status evidence. Do not publish with attribution placeholders unresolved.
+
+## Essential project files
+
+- [`portfolio_resilience_audit.ipynb`](portfolio_resilience_audit.ipynb) — analysis notebook.
+- [`requirements.txt`](requirements.txt) — Python dependencies.
+- [`.gitignore`](.gitignore) — prevents accidental commits of the raw dataset and temporary files.
+- [`CITATION_AND_LICENSE.md`](CITATION_AND_LICENSE.md) — dataset attribution and license checklist.
+- [`LICENSE`](LICENSE) — license for the original project code and documentation.
